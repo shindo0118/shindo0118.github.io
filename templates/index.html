@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Symbol
+                </th>
+                <th>
+                     Names
+                </th>
+                <th>
+                    Shares
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Total
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set total = namespace(value=0) %}
+            {% for mylist in mylists %}
+            <tr>
+                <td>
+                    {{ mylist.symbol }}
+                </td>
+                <td>
+                    {{ mylist.name }}
+                </td>
+                <td>
+                    {% for share in shares %}
+                        {% if mylist.symbol == share.symbol %}
+                            {{ share["SUM(shares)"] }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {{ mylist.price | usd }}
+                </td>
+                <td>
+                    {% for share in shares %}
+                        {% if mylist.symbol == share.symbol %}
+                            {{ (share["SUM(shares)"]*mylist.price) | usd }}
+                            {% set total.value = total.value + share["SUM(shares)"]*mylist.price %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>CASH</td>
+                <td colspan="3"></td>
+                <td>{{ current | usd }}</td>
+                {% set total.value = total.value + current %}
+            </tr>
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td colspan="4"></td>
+                <td>{{ total.value | usd }}</td>
+            </tr>
+        </tfoot>
+
+    </table>
+
+    <form action="/" method="post">
+        <div class="form-group">
+            <input autocomplete="off" class="form-control" min="0" name="add" placeholder="Add Cash" type="number">
+        </div>
+        <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+
+{% endblock %}
